@@ -1,4 +1,5 @@
 require 'digest'
+require 'pry'
 
 def process_file(dir, in_path, out_path, cols, with_header, pick_cols, encrypt_cols, encrypt_method, delimiter)
   begin
@@ -19,7 +20,7 @@ def process_file(dir, in_path, out_path, cols, with_header, pick_cols, encrypt_c
   rescue Errno::ENOENT => e
     abort('File does NOT Exists')
   rescue EOFError => e
-    puts "Records: #{lines}"
+    puts "Total Records: #{lines}"
   ensure
     in_file.close unless in_file.nil?
     out_file.close unless out_file.nil?
@@ -32,8 +33,9 @@ def writeline(in_line, out_file, pick_cols, encrypt_cols, encrypt_method, delimi
   in_cells.each_index do |index|
     next unless pick_cols.include?(index)
     if encrypt_cols.include?(index) && !is_header
+      # binding.pry
       # out_cells << Digest::SHA256.hexdigest(in_cells[index])
-      out_cells << Object.const_get("Digest::#{encrypt_method.upcase}").hexdigest(in_cells[index])
+      out_cells << Object.const_get("Digest::#{encrypt_method.upcase}").hexdigest(in_cells[index].strip)
     else
       out_cells << in_cells[index]
     end
@@ -61,7 +63,7 @@ abort('Missing arguments') unless dir && in_path && out_path && cols
 
 with_header = args['with_header']
 pick_cols = args['pick_cols'].nil? ? (0..cols.to_i-1).to_a : args['pick_cols'].split(',').map {|c| c.to_i}
-encrypt_cols = args['encrypt_cols'].nil? ? (0..cols.to_i-1).to_a : args['encrypt_cols'].split(',').map {|c| c.to_i}
+encrypt_cols = args['encrypt_cols'].nil? ? [] : args['encrypt_cols'].split(',').map {|c| c.to_i}
 encrypt_method = args['encrypt_method']
 delimiter = args['delimiter'] || ','
 
