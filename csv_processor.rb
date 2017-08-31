@@ -36,7 +36,7 @@ def writeline(in_line, out_file, pick_cols, encrypt_cols, non_blank_cols, encryp
     if encrypt_cols.include?(index) && !is_header
       # binding.pry
       # out_cells << Digest::SHA256.hexdigest(in_cells[index])
-      out_cells << Object.const_get("Digest::#{encrypt_method.upcase}").hexdigest('a'+in_cells[index].strip)
+      out_cells << Object.const_get("Digest::#{encrypt_method.upcase}").hexdigest(in_cells[index].strip)
     else
       out_cells << in_cells[index]
     end
